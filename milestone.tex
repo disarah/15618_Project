@@ -1,0 +1,123 @@
+%% You can use this file to create your answer for Exercise 1.  
+%% Fill in the places labeled by comments.
+%% Generate a PDF document by with the command `pdflatex ex1'.
+
+\documentclass[11pt]{article}
+
+\usepackage{fullpage}
+\usepackage{amsmath,amsopn}
+\usepackage{graphicx}
+\usepackage{color}
+\usepackage{verbatim}
+\usepackage{setspace}
+\usepackage{gensymb}
+\usepackage{float}
+\usepackage{pgfplots}
+\pgfplotsset{compat=1.16}
+\usepackage[normalem]{ulem}
+%\usepackage[dvips,bookmarks=false,colorlinks,urlcolor=blue,pdftitle={
+\usepackage{caption}
+\usepackage{subcaption}
+\usepackage{amssymb}
+\usepackage{amsfonts}
+\usepackage{amsthm}
+\usepackage{comment}
+\usepackage{times}
+\usepackage{listings}
+\usepackage{enumerate}
+\usepackage{courier}
+\usepackage{hyperref}
+\usepackage{xcolor}
+\usepackage{verbatimbox}
+\usepackage{tikz}
+\usepackage{tikzscale}
+\usepgfplotslibrary{groupplots}
+\usepackage{float}
+
+\def\vO{{\bf O}}
+\def\vP{{\bf P}}
+\def\vp{{\bf p}}
+\def\vx{{\bf x}}
+\def\vl{{\bf l}}
+\def\mS{{\bf S}}
+\def\mT{{\bf T}}
+\def\mH{{\bf H}}
+\def\mA{{\bf A}}
+\def\tx{{\tilde{\bf x}}}
+\def\ta{{\tilde{\bf a}}}
+\def\tb{{\tilde{\bf b}}}
+\def\tc{{\tilde{\bf c}}}
+\def\hn{{\bf \hat{n}}}
+\def\hv{{\bf \hat{v}}}
+\def\hh{{\bf \hat{h}}}
+\def\vh{{\bf h}}
+\def\vs{{\bf s}}
+\def\hs{{\bf \hat{s}}}
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\ud}{\,\mathrm{d}}
+
+\input{config-written1.tex}
+
+%% Page layout
+\oddsidemargin 0pt
+\evensidemargin 0pt
+\textheight 600pt
+\textwidth 469pt
+\setlength{\parindent}{0em}
+\setlength{\parskip}{1ex}
+
+%% Colored hyperlink 
+\newcommand{\cref}[2]{\href{#1}{\color{blue}#2}}
+\newcommand{\todo}[1]{[\textcolor{red}{\textit{TODO: }{#1}}]}
+
+%% Customization to listing
+\lstset{basicstyle=\ttfamily,language=C++,morekeywords={uniform,foreach}}
+
+%% Enumerate environment with alphabetic labels
+\newenvironment{choice}{\begin{enumerate}[A.]}{\end{enumerate}}
+%% Environment for supplying answers to problem
+\newenvironment{answer}{\begin{minipage}[c][1.0in]{\textwidth}}{\end{minipage}}
+\newenvironment{answer2}{\begin{minipage}[c][1.0in]{\textwidth}}{\end{minipage}}
+
+\begin{document}
+\begin{center}
+\LARGE
+15-418/618 \thisterm{} Project Milestone Report
+\\ 
+PROJECT TITLE
+\end{center}
+\begin{flushright}
+{\large\bf Full Names: Sarah Di, Jinsol Park\makebox[2in][l]{
+%% Put your name on the next line
+
+}}
+
+{\large\bf Andrew IDs: sarahdi, jinsolp\makebox[2in][l]{\tt
+%% Put your Andrew ID on the next line
+
+}}
+\end{flushright}
+
+{\large\bf Project Page URL: \url{https://github.com/disarah/15618\_Project}\makebox[2in][l]{
+%% Put your name on the next line
+
+}}
+
+
+\section{Summary}
+Your goal in the writeup is to assure the course staff (and yourself) that your project is proceeding as you said it would in your proposal. If it is not, your milestone writeup should emphasize what has been causing you problems, and provide an adjusted schedule and adjusted goals. As projects differ, not all items in the list below are relevant to all projects.
+
+• Make sure your project schedule on your main project page is up to date with work completed so far, and well as with a revised plan of work for the coming weeks. 
+
+As by this time you should have a good understanding of what is required to complete your project, I want to see a very detailed schedule for the coming weeks. I suggest breaking time down into half-week increments. Each increment should have at least one task, and for each task put a person’s name on it.
+
+• One to two paragraphs, summarize the work that you have completed so far. (This should be easy if you have been maintaining this information on your project page.)
+
+• Describe how you are doing with respect to the goals and deliverables stated in your proposal. Do you still believe you will be able to produce all your deliverables? If not, why? What about the ”nice to haves”? In your milestone writeup we want a new list of goals that you plan to hit for the poster session.
+
+• What do you plan to show at the poster session? Will it be a demo? Will it be a graph?
+
+• Do you have preliminary results at this time? If so, it would be great to included them in your milestone write-up.
+
+• List the issues that concern you the most. Are there any remaining unknowns (things you simply don’t know how to solve, or resource you don’t know how to get) or is it just a matter of coding and doing the work? If you do not wish to put this information on a public web site you are welcome to email the staff directly.
+\end{document}
