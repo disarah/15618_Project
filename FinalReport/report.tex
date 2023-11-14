@@ -5,7 +5,7 @@
 \documentclass[11pt]{article}
 
 % Remove the "review" option to generate the final version.
-\usepackage[]{report}
+\usepackage[]{FinalReport/report}
 
 % Standard package includes
 \usepackage{times}
@@ -15,206 +15,82 @@
 \usepackage{microtype}
 \usepackage{inconsolata}
 
-\title{Project Title}
+\title{15-618 Project Title}
 
 \author{Sarah Di \\
-  Affiliation / Address line 1 \\
-  Affiliation / Address line 2 \\
-  Affiliation / Address line 3 \\
-  \texttt{email@domain} \\\And
+  Carnegie Mellon University\\
+  \texttt{sarahdi@andrew.cmu.edu} \\\And
   Jinsol Park \\
-  Affiliation / Address line 1 \\
-  Affiliation / Address line 2 \\
-  Affiliation / Address line 3 \\
-  \texttt{email@domain} \\}
+  Carnegie Mellon University\\
+  \texttt{jinsolp@andrew.cmu.edu} \\}
 
 \begin{document}
 \maketitle
 \begin{abstract}
 A short (no more than a paragraph) project summary. If applicable, the summary should list your project deliverables (including what you plan to show at the parallelism competition) and what machines they ran on. Here are some examples:
-• We implemented smooth particle hydrodynamics in CUDA on the GPU and in ISPC
-on the CPU and compared the performance of the two implementations.
-• We parallelized a chess bot. Our 64 core implementation on Bridges-2 achieves a 40x
-speedup and won several games on an internet chess server.
+
+• We implemented smooth particle hydrodynamics in CUDA on the GPU and in ISPC on the CPU and compared the performance of the two implementations.
+
+• We parallelized a chess bot. Our 64 core implementation on Bridges-2 achieves a 40x speedup and won several games on an internet chess server.
+
 • We accelerated image processing operations using the GPU. Given the speed
-of our implementation, we demonstrate that a brute-force approach to breaking
-CAPTCHAS is effective.
+of our implementation, we demonstrate that a brute-force approach to breaking CAPTCHAS is effective. \cite{beltagy2020longformer}
 \end{abstract}
 
-\section{Introduction}
+\section{Background}
+Describe the algorithm, application, or system you parallelized in computer science terms. Figures would be really useful here.
+• What are the key data structures?
+• What are the key operations on these data structures?
+• What are the algorithm’s inputs and outputs?
+• What is the part that computationally expensive and could benefit from parallelization?
+• Break down the workload. Where are the dependencies in the program? How much parallelism is there? Is it data-parallel? Where is the locality? Is it amenable to SIMD execution?
 
-These instructions are for authors submitting papers to ACL 2023 using \LaTeX. They are not self-contained. All authors must follow the general instructions for *ACL proceedings,\footnote{\url{http://acl-org.github.io/ACLPUB/formatting.html}} as well as guidelines set forth in the ACL 2023 call for papers.\footnote{\url{https://2023.aclweb.org/calls/main_conference/}} This document contains additional instructions for the \LaTeX{} style files.
-The templates include the \LaTeX{} source of this document (\texttt{acl2023.tex}),
-the \LaTeX{} style file used to format it (\texttt{acl2023.sty}),
-an example bibliography (\texttt{custom.bib}).
+\footnote{\url{http://acl-org.github.io/ACLPUB/formatting.html}}
 
-\section{Engines}
+\section{Approach}
 
-To produce a PDF file, pdf\LaTeX{} is strongly recommended (over original \LaTeX{} plus dvips+ps2pdf or dvipdf). Xe\LaTeX{} also produces PDF files, and is especially suitable for text in non-Latin scripts.
-\begin{table}
-\centering
-\begin{tabular}{lc}
-\hline
-\textbf{Command} & \textbf{Output}\\
-\hline
-\verb|{\"a}| & {\"a} \\
-\verb|{\^e}| & {\^e} \\
-\verb|{\`i}| & {\`i} \\ 
-\verb|{\.I}| & {\.I} \\ 
-\verb|{\o}| & {\o} \\
-\verb|{\'u}| & {\'u}  \\ 
-\verb|{\aa}| & {\aa}  \\\hline
-\end{tabular}
-\begin{tabular}{lc}
-\hline
-\textbf{Command} & \textbf{Output}\\
-\hline
-\verb|{\c c}| & {\c c} \\ 
-\verb|{\u g}| & {\u g} \\ 
-\verb|{\l}| & {\l} \\ 
-\verb|{\~n}| & {\~n} \\ 
-\verb|{\H o}| & {\H o} \\ 
-\verb|{\v r}| & {\v r} \\ 
-\verb|{\ss}| & {\ss} \\
-\hline
-\end{tabular}
-\caption{Example commands for accented characters, to be used in, \emph{e.g.}, Bib\TeX{} entries.}
-\label{tab:accents}
-\end{table}
-\section{Preamble}
-\begin{table*}
-\centering
-\begin{tabular}{lll}
-\hline
-\textbf{Output} & \textbf{natbib command} & \textbf{Old ACL-style command}\\
-\hline
-\citep{ct1965} & \verb|\citep| & \verb|\cite| \\
-\citealp{ct1965} & \verb|\citealp| & no equivalent \\
-\citet{ct1965} & \verb|\citet| & \verb|\newcite| \\
-\citeyearpar{ct1965} & \verb|\citeyearpar| & \verb|\shortcite| \\
-\citeposs{ct1965} & \verb|\citeposs| & no equivalent \\
-\citep[FFT;][]{ct1965} &  \verb|\citep[FFT;][]| & no equivalent\\
-\hline
-\end{tabular}
-\caption{\label{citation-guide}
-Citation commands supported by the style file.
-The style is based on the natbib package and supports all natbib citation commands.
-}
-\end{table*}
-The first line of the file must be
-\begin{quote}
-\begin{verbatim}
-\documentclass[11pt]{article}
-\end{verbatim}
-\end{quote}
-To load the style file in the review version:
-\begin{quote}
-\begin{verbatim}
-\usepackage[review]{ACL2023}
-\end{verbatim}
-\end{quote}
-For the final version, omit the \verb|review| option:
-\begin{quote}
-\begin{verbatim}
-\usepackage{ACL2023}
-\end{verbatim}
-\end{quote}
-To use Times Roman, put the following in the preamble:
-\begin{quote}
-\begin{verbatim}
-\usepackage{times}
-\end{verbatim}
-\end{quote}
-(Alternatives like txfonts or newtx are also acceptable.)
-Please see the \LaTeX{} source of this document for comments on other packages that may be useful.
-Set the title and author using \verb|\title| and \verb|\author|. Within the author list, format multiple authors using \verb|\and| and \verb|\And| and \verb|\AND|; please see the \LaTeX{} source for examples.
-By default, the box containing the title and author names is set to the minimum of 5 cm. If you need more space, include the following in the preamble:
-\begin{quote}
-\begin{verbatim}
-\setlength\titlebox{<dim>}
-\end{verbatim}
-\end{quote}
-where \verb|<dim>| is replaced with a length. Do not set this length smaller than 5 cm.
+Tell us how your implementation works. Your description should be sufficiently detailed to provide the course staff a basic understanding of your approach. Again, it might be very useful to include a figure here illustrating components of the system and/or their mapping to parallel hardware. 
 
-\section{Document Body}
+• Describe the technologies used. What language/APIs? What machines did you target?
 
-\subsection{Footnotes}
+• Describe how you mapped the problem to your target parallel machine(s). IMPORTANT: How do the data structures and operations you described in part 2 map to machine concepts like cores and threads. (or warps, thread blocks, gangs, etc.)
 
-Footnotes are inserted with the \verb|\footnote| command.\footnote{This is a footnote.}
+• Did you change the original serial algorithm to enable better mapping to a parallel machine?
 
-\subsection{Tables and figures}
+• If your project involved many iterations of optimization, please describe this process as well. What did you try that did not work? How did you arrive at your solution? The notes you’ve been writing throughout your project should be helpful here. Convince us you worked hard to arrive at a good solution.
 
-See Table~\ref{tab:accents} for an example of a table and its caption.
-\textbf{Do not override the default caption sizes.}
+• If you started with an existing piece of code, please mention it (and where it came
+from) here.
 
-\subsection{Hyperlinks}
+\section{Results}
 
-Users of older versions of \LaTeX{} may encounter the following error during compilation: 
-\begin{quote}
-\tt\verb|\pdfendlink| ended up in different nesting level than \verb|\pdfstartlink|.
-\end{quote}
-This happens when pdf\LaTeX{} is used and a citation splits across a page boundary. The best way to fix this is to upgrade \LaTeX{} to 2018-12-01 or later.
+How successful were you at achieving your goals? We expect results sections to differ from project to project, but we expect your evaluation to be very thorough (your project evaluation is a great way to demonstrate you understood topics from this course).
 
-\subsection{Citations}
+Here are a few ideas:
 
+• If your project was optimizing an algorithm, please define how you measured performance. Is it wall-clock time? Speedup? An application specific rate? (e.g., moves per second, images/sec)
 
+• Please also describe your experimental setup. What were the size of the inputs? How were requests generated?
 
-Table~\ref{citation-guide} shows the syntax supported by the style files.
-We encourage you to use the natbib styles.
-You can use the command \verb|\citet| (cite in text) to get ``author (year)'' citations, like this citation to a paper by \citet{Gusfield:97}.
-You can use the command \verb|\citep| (cite in parentheses) to get ``(author, year)'' citations \citep{Gusfield:97}.
-You can use the command \verb|\citealp| (alternative cite without parentheses) to get ``author, year'' citations, which is useful for using citations within parentheses (e.g. \citealp{Gusfield:97}).
+• Provide graphs of speedup or execute time. Please precisely define the configurations being compared. Is your baseline single-threaded CPU code? It is an optimized parallel implementation for a single CPU?
 
-\subsection{References}
+• Recall the importance of problem size. Is it important to report results for different problem sizes for your project? Do different workloads exhibit different execution behavior?
 
-\nocite{Ando2005,augenstein-etal-2016-stance,andrew2007scalable,rasooli-tetrault-2015,goodman-etal-2016-noise,harper-2014-learning}
+• IMPORTANT: What limited your speedup? Is it a lack of parallelism? (dependencies) Communication or synchronization overhead? Data transfer (memory-bound or bus transfer bound). Poor SIMD utilization due to divergence? As you try and answer these questions, we strongly prefer that you provide data and measurements to support your conclusions. If you are merely speculating, please state this explicitly. Performing a solid analysis of your implementation is a good way to pick up credit even if your optimization efforts did not yield the performance you were hoping for.
 
-The \LaTeX{} and Bib\TeX{} style files provided roughly follow the American Psychological Association format.
-If your own bib file is named \texttt{custom.bib}, then placing the following before any appendices in your \LaTeX{} file will generate the references section for you:
-\begin{quote}
-\begin{verbatim}
-\bibliography{custom}
-\end{verbatim}
-\end{quote}
-You can obtain the complete ACL Anthology as a Bib\TeX{} file from \url{https://aclweb.org/anthology/anthology.bib.gz}.
-To include both the Anthology and your own .bib file, use the following instead of the above.
-\begin{quote}
-\begin{verbatim}
-\bibliography{anthology,custom}
-\end{verbatim}
-\end{quote}
-Please see Section~\ref{sec:bibtex} for information on preparing Bib\TeX{} files.
+\subsection{Deeper Analysis}
+• Deeper analysis: Can you break execution time of your algorithm into a number of distinct components. What percentage of time is spent in each region? Where is there room to improve?
 
-\subsection{Appendices}
+• Was your choice of machine target sound? (If you chose a GPU, would a CPU have been a better choice? Or vice versa.)
 
-Use \verb|\appendix| before any appendix section to switch the section numbering over to letters. See Appendix~\ref{sec:appendix} for an example.
-
-\section{Bib\TeX{} Files}
-\label{sec:bibtex}
-
-Unicode cannot be used in Bib\TeX{} entries, and some ways of typing special characters can disrupt Bib\TeX's alphabetization. The recommended way of typing special characters is shown in Table~\ref{tab:accents}.
-
-Please ensure that Bib\TeX{} records contain DOIs or URLs when possible, and for all the ACL materials that you reference.
-Use the \verb|doi| field for DOIs and the \verb|url| field for URLs.
-If a Bib\TeX{} entry has a URL or DOI field, the paper title in the references section will appear as a hyperlink to the paper, using the hyperref \LaTeX{} package.
-
-\section*{Limitations}
-ACL 2023 requires all submissions to have a section titled ``Limitations'', for discussing the limitations of the paper as a complement to the discussion of strengths in the main text. This section should occur after the conclusion, but before the references. It will not count towards the page limit.
-The discussion of limitations is mandatory. Papers without a limitation section will be desk-rejected without review.
-
-While we are open to different types of limitations, just mentioning that a set of results have been shown for English only probably does not reflect what we expect. 
-Mentioning that the method works mostly for languages with limited morphology, like English, is a much better alternative.
-In addition, limitations such as low scalability to long text, the requirement of large GPU resources, or other things that inspire crucial further investigation are welcome.
-
-\section*{Ethics Statement}
-
-
-\section*{Acknowledgements}
+\section{List of work by each student, Distribution of Total Credit}
+Please list the work performed by each partner. Given that you worked in a
+group, how should the total credit for the project be distributed amongst the participants? If you do not feel comfortable placing this information on a public web page, it is okay to include it only on the version that you submit via Gradescope.
 
 
 % Entries for the entire Anthology, followed by custom entries
 \bibliographystyle{plain}
-\bibliography{custom}
+\bibliography{FinalReport/custom}
 
 \appendix
 
