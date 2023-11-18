@@ -1,6 +1,6 @@
 EXECUTABLE := main
 LDFLAGS=-L/usr/local/cuda-11.7/lib64/ -lcudart
-CU_FILES   := naiveAttention.cu
+CU_FILES   := gpuNaiveAttention.cu
 CU_DEPS    :=
 CC_FILES   := main.cpp
 LOGS	   := logs
@@ -26,7 +26,7 @@ LDFRAMEWORKS := $(addprefix -framework , $(FRAMEWORKS))
 
 NVCC=nvcc
 
-OBJS=$(OBJDIR)/main.o $(OBJDIR)/naiveAttention.o
+OBJS=$(OBJDIR)/main.o $(OBJDIR)/gpuNaiveAttention.o
 
 
 .PHONY: dirs clean
