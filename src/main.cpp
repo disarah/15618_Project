@@ -3,11 +3,14 @@
 #include <cmath>
 #include <chrono>
 #include <cstdlib>
+#include <unistd.h>
+
 
 #include "gpuNaiveAttention.h"
+#include "gpuSparseAttention.h"
 
-#define N 512
-#define D_MODEL 1024
+#define N 1024
+#define D_MODEL 512
 #define N_HEAD 16    // should be able to divide D_MODEL
 #define d_k D_MODEL / N_HEAD
 
@@ -89,18 +92,17 @@ class CPUNaiveAttention {
         // std::cout << "result: " << std::chrono::duration_cast<std::chrono::microseconds>(end - beg).count() << std::endl;
 
         auto end = std::chrono::steady_clock::now();
-        std::cout << "cpu naive attention: " << std::chrono::duration_cast<std::chrono::microseconds>(end - beg).count() << std::endl;
+        std::cout << "cpu naive attention: " << std::chrono::duration_cast<std::chrono::milliseconds>(end - beg).count() << "ms" << std::endl;
     }
 };
 
 
 int main(void) {
     CPUNaiveAttention cpuNaiveAttention;
-    // auto beg = std::chrono::system_clock::now();
     cpuNaiveAttention.scaled_dot_product_attention();
-    // auto end = std::chrono::system_clock::now();
-    // std::cout << "cpu naive attention: " << std::chrono::duration_cast<std::chrono::microseconds>(end - beg).count() << std::endl;
 
-    gpuNaiveAttention();
+    // ?? why not work for both
+    gpuNaiveAttention(N, D_MODEL, N_HEAD);
+    gpuSparseAttention(N, D_MODEL, N_HEAD);
 	return 0;
 }
