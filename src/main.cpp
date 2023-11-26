@@ -9,9 +9,9 @@
 #include "gpuNaiveAttention.h"
 #include "gpuSparseAttention.h"
 
-#define N 1024
-#define D_MODEL 512
-#define N_HEAD 16    // should be able to divide D_MODEL
+#define N 1024  // multiple of 8
+#define D_MODEL 512 // multiple of 8
+#define N_HEAD 8    // should be able to divide D_MODEL
 #define d_k D_MODEL / N_HEAD
 
 class CPUNaiveAttention {

@@ -8,6 +8,33 @@
 
 #include "gpuNaiveAttention.h"
 
+#define TS 8
+
+__global__ void MultiHeadGEMM(float* A, float* B, float* C, int M, int N, int K) {
+    __shared__ float lA[TS][TS];
+    __shared__ float lB[TS][TS];
+    
+    int h = threadIdx.x;
+    int j = blockDim.y * blockIdx.y + threadIdx.y;
+    int i = blockDim.z * blockIdx.z + threadIdx.z;
+    int q = threadIdx.y;  // pos within tile
+    int p = threadIdx.z;
+
+    // if (i >= M || j >= N) return;
+    float tmp = 0.0f;
+    for(int c = 0; c < K / TS; c++){
+        lA[p][q] = A[h * M * K + i * K + c * TS + q];
+        lB[p][q] = B[h * K * N + (c * TS + p) * N + j];
+        __syncthreads();
+        for(int k = 0; k < TS; k++){
+            tmp += lA[p][k] * lB[k][q];
+        }
+        __syncthreads();
+    }
+    C[h * M * N + i * N + j] = tmp;
+  
+}
+
 
 __global__ void naiveAttention(float* query, float* key, float* value,
                                 int N, int N_HEAD, int d_k, float sqrt_d_k,
@@ -48,6 +75,7 @@ __global__ void naiveAttention(float* query, float* key, float* value,
     }
 }
 
+
 void gpuNaiveAttention(int N, int D_MODEL, int N_HEAD) {
     int d_k = D_MODEL / N_HEAD;
     float sqrt_d_k = sqrt(d_k);
@@ -59,7 +87,7 @@ void gpuNaiveAttention(int N, int D_MODEL, int N_HEAD) {
     cudaMalloc((void **)&attn_scores, N_HEAD * N*N * sizeof(float));
     cudaMalloc((void **)&result, N_HEAD*N*d_k * sizeof(float));
 
-
+    // =============================================================================================
     // super simple version.
     // each thread takes care of calculation for a single "head" in multihead attention
     dim3 threadPerBlock(N_HEAD);
@@ -80,7 +108,36 @@ void gpuNaiveAttention(int N, int D_MODEL, int N_HEAD) {
     cudaEventSynchronize(stop);
 
     cudaEventElapsedTime(&elapsedTime, start,stop);
-    printf("gpu naive attention: %fms\n" ,elapsedTime);
-    // std::cout << "gpu sparse attention: " << std::chrono::duration_cast<std::chrono::microseconds>(end - beg).count() << std::endl;
+    printf("gpu naive attention (per-head parallelization): %fms\n" ,elapsedTime);
+
+    // =============================================================================================
+    // shared mem optimized ver (tiling)
+    dim3 threadPerBlock2(N_HEAD, TS, TS);
+    dim3 numBlock2(1, (N + TS-1)/TS, (N + TS-1)/TS);
+
+    dim3 threadPerBlock4(N_HEAD, TS, TS);
+    dim3 numBlock4(1, (d_k + TS-1)/TS, (N + TS-1)/TS);
+
+    cudaEvent_t start2, stop2;
+    elapsedTime = 0.0;
+    cudaEventCreate(&start2);
+    cudaEventCreate(&stop2);
+
+    cudaEventRecord(start2,0);
+
+    // query x key^T
+	MultiHeadGEMM<<<numBlock2, threadPerBlock2>>>(query, key, attn_scores, N, N, d_k);
+
+    // TODO: softmax
+
+    // softmaxed attn scores x value 
+    MultiHeadGEMM<<<numBlock4, threadPerBlock4>>>(attn_scores, value, result, N, d_k, N);
+
+    cudaDeviceSynchronize();
+    cudaEventRecord(stop2,0);
+    cudaEventSynchronize(stop2);
+
+    cudaEventElapsedTime(&elapsedTime, start2,stop2);
+    printf("gpu naive attention (tile parallelization using shared mem): %fms\n" ,elapsedTime);
 
 }
