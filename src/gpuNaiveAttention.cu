@@ -35,6 +35,31 @@ __global__ void MultiHeadGEMM(float* A, float* B, float* C, int M, int N, int K)
   
 }
 
+__global__ void MultiHeadSoftMax(float* A, int M, int N) {
+    extern __shared__ float SM[];
+
+    int h = blockIdx.x;
+    int localCol = threadIdx.y;
+    int globalCol = blockDim.y * blockIdx.y + threadIdx.y;
+    int row = blockIdx.z;
+
+    register float cnt = 0.0;
+    for(int i = 0; i < N / blockDim.y; i++) {
+        cnt += A[h * M * N + row * N + localCol * blockDim.y + i];
+    }
+    SM[localCol] = cnt;
+
+    __syncthreads();
+
+    register float total = 0.0;
+
+    for(int i = 0; i < blockDim.y; i++) {
+        total += SM[i];
+    }
+
+    A[h * M * N + row * N + globalCol] /= total;
+}
+
 
 __global__ void naiveAttention(float* query, float* key, float* value,
                                 int N, int N_HEAD, int d_k, float sqrt_d_k,
@@ -115,6 +140,11 @@ void gpuNaiveAttention(int N, int D_MODEL, int N_HEAD) {
     dim3 threadPerBlock2(N_HEAD, TS, TS);
     dim3 numBlock2(1, (N + TS-1)/TS, (N + TS-1)/TS);
 
+    // int threadPerBlockRow = 1024/N_HEAD;
+    int numT = 1024;
+    dim3 threadPerBlock3(1, numT, 1);
+    dim3 numBlock3(N_HEAD, N / numT, N);
+
     dim3 threadPerBlock4(N_HEAD, TS, TS);
     dim3 numBlock4(1, (d_k + TS-1)/TS, (N + TS-1)/TS);
 
@@ -129,7 +159,8 @@ void gpuNaiveAttention(int N, int D_MODEL, int N_HEAD) {
 	MultiHeadGEMM<<<numBlock2, threadPerBlock2>>>(query, key, attn_scores, N, N, d_k);
 
     // TODO: softmax
-
+    uint SMSize = sizeof(float) * numT;
+    MultiHeadSoftMax<<<numBlock3, threadPerBlock3, SMSize>>>(attn_scores, N, N);
     // softmaxed attn scores x value 
     MultiHeadGEMM<<<numBlock4, threadPerBlock4>>>(attn_scores, value, result, N, d_k, N);
 
