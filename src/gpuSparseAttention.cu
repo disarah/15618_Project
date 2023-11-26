@@ -76,15 +76,13 @@ void gpuSparseAttention(int N, int D_MODEL, int N_HEAD) {
     cudaEventCreate(&stop);
 
     cudaEventRecord(start,0);
-    // auto beg = std::chrono::high_resolution_clock::now();
 	sparseAttention<<<numBlock, threadPerBlock>>>(query, key, value, N, N_HEAD, d_k, sqrt_d_k, attn_scores, result, ws);
 
     cudaDeviceSynchronize();
-    // auto end = std::chrono::high_resolution_clock::now();
     cudaEventRecord(stop,0);
     cudaEventSynchronize(stop);
 
     cudaEventElapsedTime(&elapsedTime, start,stop);
-    printf("gpu sparse attention: %fms\n" ,elapsedTime);
+    printf("gpu sparse attention (inefficient per-head parallelization): %fms\n" ,elapsedTime);
 
 }
