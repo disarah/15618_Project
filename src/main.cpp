@@ -92,17 +92,19 @@ class CPUNaiveAttention {
         // std::cout << "result: " << std::chrono::duration_cast<std::chrono::microseconds>(end - beg).count() << std::endl;
 
         auto end = std::chrono::steady_clock::now();
-        std::cout << "cpu naive attention: " << std::chrono::duration_cast<std::chrono::milliseconds>(end - beg).count() << "ms" << std::endl;
+        std::cout << "cpu naive attention: " << std::chrono::duration_cast<std::chrono::milliseconds>(end - beg).count() << "ms" << "\n\n";
     }
 };
 
 
 int main(void) {
+    printf("========================== CPU Naive ==========================\n");
     CPUNaiveAttention cpuNaiveAttention;
     cpuNaiveAttention.scaled_dot_product_attention();
 
-    // ?? why not work for both
+    printf("========================== GPU Naive ==========================\n");
     gpuNaiveAttention(N, D_MODEL, N_HEAD);
+    printf("========================== GPU Sparse ==========================\n");
     gpuSparseAttention(N, D_MODEL, N_HEAD);
 	return 0;
 }
