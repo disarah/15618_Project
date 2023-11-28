@@ -57,7 +57,7 @@ __global__ void sparseAttention(float* query, float* key, float* value,
 void gpuSparseAttention(int N, int D_MODEL, int N_HEAD) {
     int d_k = D_MODEL / N_HEAD;
     float sqrt_d_k = sqrt(d_k);
-    int ws = 64; // window size
+    int ws = 16; // window size
 
     float *query, *key, *value, *attn_scores, *result;
     cudaMalloc((void **)&query, N_HEAD*N*d_k * sizeof(float));
@@ -84,5 +84,4 @@ void gpuSparseAttention(int N, int D_MODEL, int N_HEAD) {
 
     cudaEventElapsedTime(&elapsedTime, start,stop);
     printf("gpu sparse attention (inefficient per-head parallelization): %fms\n" ,elapsedTime);
-
 }
