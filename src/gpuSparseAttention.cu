@@ -8,6 +8,31 @@
 
 #include "gpuSparseAttention.h"
 
+#define TS 8
+
+__global__ void MultiHeadDDS(float* A, float* B, float* C, int M, int N, int K, int ws) {
+    __shared__ float lA[TS][TS];
+    __shared__ float lB[TS][TS];
+    
+    int h = threadIdx.x;
+    int i = blockDim.x * ws + blockDim.z * blockIdx.z + threadIdx.z;
+    int j = blockDim.x * ws +  blockDim.y * blockIdx.y + threadIdx.y;
+    int q = threadIdx.y;  // pos within tile
+    int p = threadIdx.z;
+
+    float tmp = 0.0f;
+    for(int c = 0; c < K / TS; c++){
+        lA[p][q] = A[h * M * K + i * K + c * TS + q];
+        lB[p][q] = B[h * K * N + (c * TS + p) * N + j];
+        __syncthreads();
+        for(int k = 0; k < TS; k++){
+            tmp += lA[p][k] * lB[k][q];
+        }
+        __syncthreads();
+    }
+    C[h * M * N + i * N + j] = tmp;
+}
+
 
 __global__ void sparseAttention(float* query, float* key, float* value,
                                 int N, int N_HEAD, int d_k, float sqrt_d_k,
@@ -57,7 +82,7 @@ __global__ void sparseAttention(float* query, float* key, float* value,
 void gpuSparseAttention(int N, int D_MODEL, int N_HEAD) {
     int d_k = D_MODEL / N_HEAD;
     float sqrt_d_k = sqrt(d_k);
-    int ws = 16; // window size
+    int ws = 16; // window size needs to be a multiple of TS
 
     float *query, *key, *value, *attn_scores, *result;
     cudaMalloc((void **)&query, N_HEAD*N*d_k * sizeof(float));
@@ -66,7 +91,8 @@ void gpuSparseAttention(int N, int D_MODEL, int N_HEAD) {
     cudaMalloc((void **)&attn_scores, N_HEAD * N*N * sizeof(float));
     cudaMalloc((void **)&result, N_HEAD*N*d_k * sizeof(float));
 
-
+    // =============================================================================================
+    // Super simple version with parallelization across heads
     dim3 threadPerBlock(N_HEAD);
     dim3 numBlock(1);
 
@@ -84,4 +110,26 @@ void gpuSparseAttention(int N, int D_MODEL, int N_HEAD) {
 
     cudaEventElapsedTime(&elapsedTime, start,stop);
     printf("gpu sparse attention (inefficient per-head parallelization): %fms\n" ,elapsedTime);
+
+    // =============================================================================================
+    // Tiling + window sparse
+    dim3 threadPerBlock2(N_HEAD, TS, TS);
+    int num_windows = N/ws;
+    dim3 numBlock2(num_windows, (ws+TS-1)/TS, (ws+TS-1)/TS);
+
+    cudaEvent_t start2, stop2;
+    elapsedTime = 0.0;
+    cudaEventCreate(&start2);
+    cudaEventCreate(&stop2);
+
+    cudaEventRecord(start2,0);
+
+    MultiHeadDDS<<<numBlock2, threadPerBlock2>>>(query, key, attn_scores, N, N, d_k, ws);
+
+    cudaDeviceSynchronize();
+    cudaEventRecord(stop2,0);
+    cudaEventSynchronize(stop2);
+
+    cudaEventElapsedTime(&elapsedTime, start2,stop2);
+    printf("gpu naive attention (tile parallelization using shared mem): %fms\n\n" ,elapsedTime);
 }
