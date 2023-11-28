@@ -34,6 +34,33 @@ __global__ void MultiHeadDDS(float* A, float* B, float* C, int M, int N, int K, 
 }
 
 
+__global__ void MultiHeadSoftMaxSparse(float* A, int M, int N, int ws) {
+    extern __shared__ float SM[];
+
+    int h = threadIdx.x;
+    int localCol = threadIdx.y;
+    int globalCol = blockDim.y * blockIdx.x + threadIdx.y;
+    // int localRow = blockIdx.y;
+    int globalRow = blockDim.y * blockIdx.x + blockIdx.y;
+
+    // register float cnt = 0.0;
+    // for(int i = 0; i <ws; i++) {
+    //     cnt += A[h * M * N + globalRow * N + i];
+    // }
+    SM[localCol] = A[h * M * N + globalRow * N + globalCol];
+
+    __syncthreads();
+
+    register float total = 0.0;
+
+    for(int i = 0; i < ws; i++) {
+        total += SM[i];
+    }
+
+    A[h * M * N + globalRow * N + globalCol] /= total;
+}
+
+
 __global__ void sparseAttention(float* query, float* key, float* value,
                                 int N, int N_HEAD, int d_k, float sqrt_d_k,
                                 float* attn_scores, float* result, int ws) {
@@ -117,6 +144,9 @@ void gpuSparseAttention(int N, int D_MODEL, int N_HEAD) {
     int num_windows = N/ws;
     dim3 numBlock2(num_windows, (ws+TS-1)/TS, (ws+TS-1)/TS);
 
+    dim3 threadPerBlock3(N_HEAD, ws, 1);
+    dim3 numBlock3(num_windows, ws, 1);
+
     cudaEvent_t start2, stop2;
     elapsedTime = 0.0;
     cudaEventCreate(&start2);
@@ -124,7 +154,12 @@ void gpuSparseAttention(int N, int D_MODEL, int N_HEAD) {
 
     cudaEventRecord(start2,0);
 
+    // query x key^T
     MultiHeadDDS<<<numBlock2, threadPerBlock2>>>(query, key, attn_scores, N, N, d_k, ws);
+
+    // softmax
+    uint SMSize = sizeof(float) * ws;
+    MultiHeadSoftMaxSparse<<<numBlock3, threadPerBlock3, SMSize>>>(attn_scores, N, N, ws);
 
     cudaDeviceSynchronize();
     cudaEventRecord(stop2,0);

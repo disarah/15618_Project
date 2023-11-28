@@ -161,6 +161,7 @@ void gpuNaiveAttention(int N, int D_MODEL, int N_HEAD) {
     // softmax
     uint SMSize = sizeof(float) * numT;
     MultiHeadSoftMax<<<numBlock3, threadPerBlock3, SMSize>>>(attn_scores, N, N);
+
     // softmaxed attn scores x value 
     MultiHeadGEMM<<<numBlock4, threadPerBlock4>>>(attn_scores, value, result, N, d_k, N);
 
