@@ -152,7 +152,7 @@ int main(void) {
 
     printf("========================== GPU Naive ==========================\n");
     gpuNaiveAttention(N, D_MODEL, N_HEAD);
-    printf("========================== GPU Sparse ==========================\n");
+    printf("========================== GPU Sparse (Window) ==========================\n");
     gpuSparseAttention(N, D_MODEL, N_HEAD);
 	return 0;
 }
