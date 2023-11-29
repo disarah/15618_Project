@@ -61,6 +61,32 @@ __global__ void MultiHeadSoftMaxSparse(float* A, int M, int N, int ws) {
 }
 
 
+__global__ void MultiHeadSDD(float* A, float* B, float* C, int M, int N, int K, int ws) {
+    __shared__ float lA[TS][TS];
+    __shared__ float lB[TS][TS];
+    
+    int h = threadIdx.x;
+    int j = blockDim.y * blockIdx.y + threadIdx.y;
+    int i = blockDim.z * blockIdx.z + threadIdx.z;
+    int q = threadIdx.y;  // pos within tile
+    int p = threadIdx.z;
+
+    float tmp = 0.0f;
+    int start = int(i/TS);
+    int end = ws / TS;
+    for(int c = start; c < end; c++){
+        lA[p][q] = A[h * M * K + i * K + c * TS + q];
+        lB[p][q] = B[h * K * N + (c * TS + p) * N + j];
+        __syncthreads();
+        for(int k = 0; k < TS; k++){
+            tmp += lA[p][k] * lB[k][q];
+        }
+        __syncthreads();
+    }
+    C[h * M * N + i * N + j] = tmp;
+}
+
+
 __global__ void sparseAttention(float* query, float* key, float* value,
                                 int N, int N_HEAD, int d_k, float sqrt_d_k,
                                 float* attn_scores, float* result, int ws) {
@@ -147,6 +173,9 @@ void gpuSparseAttention(int N, int D_MODEL, int N_HEAD) {
     dim3 threadPerBlock3(N_HEAD, ws, 1);
     dim3 numBlock3(num_windows, ws, 1);
 
+    dim3 threadPerBlock4(N_HEAD, TS, TS);
+    dim3 numBlock4(1, (d_k + TS-1)/TS, (N + TS-1)/TS);
+
     cudaEvent_t start2, stop2;
     elapsedTime = 0.0;
     cudaEventCreate(&start2);
@@ -161,10 +190,12 @@ void gpuSparseAttention(int N, int D_MODEL, int N_HEAD) {
     uint SMSize = sizeof(float) * ws;
     MultiHeadSoftMaxSparse<<<numBlock3, threadPerBlock3, SMSize>>>(attn_scores, N, N, ws);
 
+    MultiHeadSDD<<<numBlock4, threadPerBlock4>>>(attn_scores, value, result, N, d_k, N, ws);
+
     cudaDeviceSynchronize();
     cudaEventRecord(stop2,0);
     cudaEventSynchronize(stop2);
 
     cudaEventElapsedTime(&elapsedTime, start2,stop2);
-    printf("gpu naive attention (tile parallelization using shared mem): %fms\n\n" ,elapsedTime);
+    printf("gpu sparse attention (tile parallelization using shared mem): %fms\n\n" ,elapsedTime);
 }
