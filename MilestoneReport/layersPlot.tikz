@@ -1,0 +1,31 @@
+\begin{tikzpicture}
+    \begin{axis}[
+        ybar stacked,
+        xlabel= Sequence Length,
+        ylabel= Time(s),
+        ymin=0,
+        xtick=data,
+        legend style={cells={anchor=west}, legend pos=north west},
+        xticklabels from table={\testdata}{Label},
+        xticklabel style={text width=2cm,align=center},
+    ]  
+    \addplot [fill=green!80] table [y=SelfAttention, meta=Label, x expr=\coordindex] {\testdata};
+    \addlegendentry{SelfAttention}
+    
+    \addplot [fill=blue!60] table [y=SelfOutput, meta=Label, x expr=\coordindex] {\testdata};
+    \addlegendentry{SelfOutput}
+    
+    \addplot [fill=red!60] table [y=Intermediate, meta=Label, x expr=\coordindex] {\testdata};
+    \addlegendentry{Intermediate}
+    
+    \addplot [fill=orange!60] table [y=Output, meta=Label, x expr=\coordindex] {\testdata};
+    \addlegendentry{Output}
+    \addplot [
+        ybar, % this makes it show the total for some reason
+        nodes near coords,
+        nodes near coords style={%
+            anchor=south,%
+        },
+    ] table [ y expr=0.00001, x expr=\coordindex] {\testdata};
+    \end{axis}
+    \end{tikzpicture}

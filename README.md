@@ -69,3 +69,26 @@ Our planned schedule is as follows:
 | 12/10 | Additional CUDA implementations \& optimizations|
 | 12/14 | Final Report Due | 
 | 12/15 | Poster Session |
+
+
+
+# Milestone (12/03)
+## Work Completed So Far
+### Summary of work
+We first validate the motivation for sparse attention with empirical data. The graphs which confirm that attention is a performance bottleneck can be seen in a later section.
+We implemented the naive attention and the sparse attention on CPU and CUDA. For the naive attention, we implemented general matrix multiplication and the softmax using a tiling scheme to exploit shared memoryefficiently.
+For this milestone, we focused on the window attention method as seen in (a) of Figure 1 for sparse attention. Since query and key matrices are dense but the resulting attention scores matrix is sparse, we cannot use general matrix multiplication. Instead, we implemented a MultiHeadDDS kernel, which performs dense × dense = sparse matrix multiplication based on the given window size. We also implemented a MultiHeadSoftMaxSparse kernel, which performs sparse softmax on the sparse attention scores matrix. Finally, we also have a MultiHeadSDD kernel to perform matrix multiplication between the sparse attention scores matrix and the dense value matrix, returning a dense matrix as the final output. All matrix multiplication kernels use tiling optimizations, and uses the window size configuration to efficiently exploit shared memory.
+
+## Preliminary Results
+![Figure 2](figures/breakdown.png)
+In Figure 2, we show the computational time of the layers present within a BERT encoder scaled by the sequence length of the inputs (ranging from 128 to 1024). Our visualization confirms that the computation time of the encoder’s attention layer, as shown in green, scales quadratically with respect to sequence length, and also that is takes up a large proportion of the computation time. We also include the computational times of other layers of the encoder, such as the Intermediate and Output (Add & Norm) layers, as shown in red and orange respectively, which combined comprise the Feed Forward part of an encoder. The SelfOutput layer, shown in blue, represents the Add & Norm Layer of Self Attention.
+
+![Figure 3](figures/exectime.png)
+Figure 3 shows the execution time of attention on GPU for different attention methods. We measured the execution time for sequence lengths 128, 256, 512, and 1024. It can be observed that the GPU Naive Attention scales quadratically with sequence length, while the GPU Sparse Attention implementation (with window size 16) scales linearly with sequence length. Also, it takes much less time compared to the full naive attention.
+
+
+![Figure 4](figures/speedup.png)
+The table above provides further information about the execution time on CPU Sparse and Naive Attentions. We provide a speedup brought by GPU Sparse Attention compared to each implementation for different sequence lengths.
+
+## Revised Schedule
+![Figure 5](figures/revised_schedule.png)

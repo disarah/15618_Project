@@ -1,0 +1,27 @@
+\begin{tikzpicture}
+\begin{axis}[
+legend style={cells={anchor=west}, legend pos=north west , legend columns=1},
+    xlabel= Sequence Length,
+    ylabel= Time($\mu$s),
+    xmin=0,
+    ymin=1, 
+            ]
+
+% \addplot[smooth,mark=*,blue] plot coordinates {
+%     (128,79.871994)
+%     (256,220.863998)
+%     (512,829.599976)
+%     (1024,6475.776367)
+% };
+% \addlegendentry{GPU Naive Attention}
+
+
+\addplot[smooth,mark=triangle,blue] plot coordinates {
+    (128,15.504000)
+    (256,20.768000)
+    (512,29.760000)
+    (1024,45.184002)
+};
+\addlegendentry{GPU Sparse Attention}
+\end{axis}
+    \end{tikzpicture}

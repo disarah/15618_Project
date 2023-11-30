@@ -14,8 +14,9 @@
 \usepackage[utf8]{inputenc}
 \usepackage{microtype}
 \usepackage{inconsolata}
+\usepackage{natbib}
 
-\title{15-618 Project Title}
+\title{15-618 Final Project: Sparse Attention in CUDA}
 
 \author{Sarah Di \\
   Carnegie Mellon University\\
@@ -27,23 +28,43 @@
 \begin{document}
 \maketitle
 \begin{abstract}
-A short (no more than a paragraph) project summary. If applicable, the summary should list your project deliverables (including what you plan to show at the parallelism competition) and what machines they ran on. Here are some examples:
+We implemented sparse attention on CPU and GPU platforms using C++ and CUDA respectively, and compared the performance of the two implementations.
 
-• We implemented smooth particle hydrodynamics in CUDA on the GPU and in ISPC on the CPU and compared the performance of the two implementations.
+INCLUDE:
+additional project deliverables 
+"Our implementation achieved X speedup"
+"Given the speed of our implementation, we demonstrate that a X approach to sparse attention is effective"
+What machines they ran on
 
-• We parallelized a chess bot. Our 64 core implementation on Bridges-2 achieves a 40x speedup and won several games on an internet chess server.
-
-• We accelerated image processing operations using the GPU. Given the speed
-of our implementation, we demonstrate that a brute-force approach to breaking CAPTCHAS is effective. \cite{beltagy2020longformer}
 \end{abstract}
 
 \section{Background}
+\cite{beltagy2020longformer}
+
 Describe the algorithm, application, or system you parallelized in computer science terms. Figures would be really useful here.
 • What are the key data structures?
 • What are the key operations on these data structures?
 • What are the algorithm’s inputs and outputs?
 • What is the part that computationally expensive and could benefit from parallelization?
 • Break down the workload. Where are the dependencies in the program? How much parallelism is there? Is it data-parallel? Where is the locality? Is it amenable to SIMD execution?
+
+\begin{table*}[h!]
+\centering
+ \begin{tabular}{||c | c c c c||} 
+ \hline
+ SeqLen & Attention & Add\&Norm & FeedForward & Add\&Norm \\ [0.5ex] 
+ \hline\hline
+ 128 & 0.079665 & 0.019992 & 0.084192 & 0.073205 \\
+ 256 & 0.300243 & 0.040303 & 0.153612 & 0.147656 \\
+ 512 & 0.545014 & 0.078534 & 0.322093 & 0.282523 \\
+ 1024 & 3.854414 & 0.193473 & 0.686376 & 0.707752 \\
+ 2048 & 13.631169 & 0.332429 & 1.277496 & 1.172507 \\ [1ex] 
+ \hline
+ \end{tabular}
+  \caption{Caption}
+  \label{fig:enter-label}
+\end{table*}
+
 
 \footnote{\url{http://acl-org.github.io/ACLPUB/formatting.html}}
 
