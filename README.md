@@ -81,13 +81,16 @@ For this milestone, we focused on the window attention method as seen in (a) of 
 
 ## Preliminary Results
 ![Figure 2](figures/breakdown.png)
+
 In Figure 2, we show the computational time of the layers present within a BERT encoder scaled by the sequence length of the inputs (ranging from 128 to 1024). Our visualization confirms that the computation time of the encoder’s attention layer, as shown in green, scales quadratically with respect to sequence length, and also that is takes up a large proportion of the computation time. We also include the computational times of other layers of the encoder, such as the Intermediate and Output (Add & Norm) layers, as shown in red and orange respectively, which combined comprise the Feed Forward part of an encoder. The SelfOutput layer, shown in blue, represents the Add & Norm Layer of Self Attention.
 
 ![Figure 3](figures/exectime.png)
+
 Figure 3 shows the execution time of attention on GPU for different attention methods. We measured the execution time for sequence lengths 128, 256, 512, and 1024. It can be observed that the GPU Naive Attention scales quadratically with sequence length, while the GPU Sparse Attention implementation (with window size 16) scales linearly with sequence length. Also, it takes much less time compared to the full naive attention.
 
 
 ![Figure 4](figures/speedup.png)
+
 The table above provides further information about the execution time on CPU Sparse and Naive Attentions. We provide a speedup brought by GPU Sparse Attention compared to each implementation for different sequence lengths.
 
 ## Revised Schedule
