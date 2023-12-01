@@ -4,6 +4,9 @@ Sarah Di (sarahdi), Jinsol Park (jinsolp)
 [Webpage](https://github.com/disarah/15618_Project)
 [Overleaf](https://www.overleaf.com/project/654ad93dc7593c6b143abdee)
 
+[Proposal Report](https://github.com/disarah/15618_Project/blob/main/ReportPDFs/15618_Proposal_Report.pdf)
+[Milestone Report](https://github.com/disarah/15618_Project/blob/main/ReportPDFs/15618_Milestone_Report.pdf)
+
 ## Summary
 We are going to implement sparse attention on CPU and GPU platforms using python and CUDA respectively, and perform analysis on both system’s performance characteristics.
 
