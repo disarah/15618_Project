@@ -6,7 +6,7 @@
 #include <cmath>
 #include <chrono>
 
-#include "gpuSparseAttention.h"
+#include "gpuSparseAttentionWindow.h"
 
 #define TS 8
 
@@ -132,7 +132,7 @@ __global__ void sparseAttention(float* query, float* key, float* value,
     }
 }
 
-void gpuSparseAttention(int N, int D_MODEL, int N_HEAD) {
+void gpuSparseAttentionWindow(int N, int D_MODEL, int N_HEAD) {
     int d_k = D_MODEL / N_HEAD;
     float sqrt_d_k = sqrt(d_k);
     int ws = 16; // window size needs to be a multiple of TS

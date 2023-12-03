@@ -7,7 +7,7 @@
 
 
 #include "gpuNaiveAttention.h"
-#include "gpuSparseAttention.h"
+#include "gpuSparseAttentionWindow.h"
 
 #define N 1024  // multiple of 8
 #define D_MODEL 512 // multiple of 8
@@ -153,6 +153,6 @@ int main(void) {
     printf("========================== GPU Naive ==========================\n");
     gpuNaiveAttention(N, D_MODEL, N_HEAD);
     printf("========================== GPU Sparse (Window) ==========================\n");
-    gpuSparseAttention(N, D_MODEL, N_HEAD);
+    gpuSparseAttentionWindow(N, D_MODEL, N_HEAD);
 	return 0;
 }
