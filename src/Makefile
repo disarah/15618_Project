@@ -1,6 +1,6 @@
 EXECUTABLE := main
 LDFLAGS=-L/usr/local/cuda-11.7/lib64/ -lcudart
-CU_FILES   := gpuNaiveAttention.cu gpuNaiveAttention.cu
+CU_FILES   := gpuNaiveAttention.cu gpuSparseAttention.cu
 CU_DEPS    :=
 CC_FILES   := main.cpp
 LOGS	   := logs

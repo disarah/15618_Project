@@ -162,7 +162,7 @@ void gpuSparseAttention(int N, int D_MODEL, int N_HEAD) {
     cudaEventSynchronize(stop);
 
     cudaEventElapsedTime(&elapsedTime, start,stop);
-    printf("gpu sparse attention (inefficient per-head parallelization): %fms\n" ,elapsedTime);
+    printf("gpu sparse attention (inefficient per-head parallelization): %f microseconds\n" ,elapsedTime*1000);
 
     // =============================================================================================
     // Tiling + window sparse
@@ -197,5 +197,5 @@ void gpuSparseAttention(int N, int D_MODEL, int N_HEAD) {
     cudaEventSynchronize(stop2);
 
     cudaEventElapsedTime(&elapsedTime, start2,stop2);
-    printf("gpu sparse attention (tile parallelization using shared mem): %fms\n\n" ,elapsedTime);
+    printf("gpu sparse attention (tile parallelization using shared mem): %f microseconds\n\n" ,elapsedTime*1000);
 }

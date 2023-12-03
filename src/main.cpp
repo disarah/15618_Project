@@ -88,7 +88,7 @@ class CPUNaiveAttention {
         }
 
         auto end = std::chrono::steady_clock::now();
-        std::cout << "cpu sparse attention: " << std::chrono::duration_cast<std::chrono::milliseconds>(end - beg).count() << "ms" << "\n\n";
+        std::cout << "cpu sparse attention: " << std::chrono::duration_cast<std::chrono::microseconds>(end - beg).count() << " microseconds" << "\n\n";
     }
 
     void scaled_dot_product_attention() {
@@ -138,7 +138,7 @@ class CPUNaiveAttention {
         }
 
         auto end = std::chrono::steady_clock::now();
-        std::cout << "cpu naive attention: " << std::chrono::duration_cast<std::chrono::milliseconds>(end - beg).count() << "ms" << "\n\n";
+        std::cout << "cpu naive attention: " << std::chrono::duration_cast<std::chrono::microseconds>(end - beg).count() << " microseconds" << "\n\n";
     }
 };
 

@@ -133,7 +133,7 @@ void gpuNaiveAttention(int N, int D_MODEL, int N_HEAD) {
     cudaEventSynchronize(stop);
 
     cudaEventElapsedTime(&elapsedTime, start,stop);
-    printf("gpu naive attention (inefficient per-head parallelization): %fms\n" ,elapsedTime);
+    printf("gpu naive attention (inefficient per-head parallelization): %f microseconds\n" ,elapsedTime*1000);
 
     // =============================================================================================
     // shared mem optimized ver (tiling)
@@ -170,6 +170,6 @@ void gpuNaiveAttention(int N, int D_MODEL, int N_HEAD) {
     cudaEventSynchronize(stop2);
 
     cudaEventElapsedTime(&elapsedTime, start2,stop2);
-    printf("gpu naive attention (tile parallelization using shared mem): %fms\n\n" ,elapsedTime);
+    printf("gpu naive attention (tile parallelization using shared mem): %f microseconds\n\n" ,elapsedTime*1000);
 
 }
