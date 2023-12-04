@@ -28,6 +28,34 @@ __global__ void MultiHeadDDS(float* A, float* B, float* C, int M, int N, int K, 
     
 }
 
+__global__ void MultiHeadSoftMaxSparse(float* A, int M, int N, int* idx, int num_random) {
+    extern __shared__ float SM[];
+
+    int h = blockIdx.x;
+    int localRow = threadIdx.x;
+    int globalRow = blockDim.x * blockIdx.y + threadIdx.x;
+
+    int tmpIdx = globalRow * num_random + threadIdx.y;
+    if (tmpIdx < N * num_random && tmpIdx >= 0) {
+        int globalCol = idx[tmpIdx];
+        SM[localRow * num_random + globalCol] = A[h * M * N + globalRow * N + globalCol];
+    }
+    
+    __syncthreads();
+
+    register float total = 0.0;
+
+    if (localRow < blockDim.x && tmpIdx < N * num_random && tmpIdx >= 0) {
+        int start = localRow * num_random;
+        for(int i = start; i < start + num_random; i++) {
+            total += SM[i];
+        }
+        int globalCol = idx[tmpIdx];
+        A[h * M * N + globalRow * N + globalCol] /= total;
+    }
+}
+
+
 
 void gpuSparseAttentionRandom(int N, int D_MODEL, int N_HEAD, float RANDOM_FRAC) {
     int d_k = D_MODEL / N_HEAD;
@@ -68,9 +96,14 @@ void gpuSparseAttentionRandom(int N, int D_MODEL, int N_HEAD, float RANDOM_FRAC)
 
     cudaMemcpy(random_idx, random_idx_vec.data(), sizeof(int) * N * num_random, cudaMemcpyHostToDevice);
 
+    // block/thread size and timer 
     int rows_per_block = (1024 + num_random-1) / num_random;
     dim3 threadPerBlock1(rows_per_block, num_random);
     dim3 numBlock1(N_HEAD, (N+rows_per_block-1)/rows_per_block);
+
+    uint SMSize = sizeof(float) * rows_per_block * num_random;
+    dim3 threadPerBlock2(rows_per_block, num_random);
+    dim3 numBlock2(N_HEAD, (N+rows_per_block-1)/rows_per_block);
 
     cudaEvent_t start, stop;
     float elapsedTime = 0.0;
@@ -81,6 +114,8 @@ void gpuSparseAttentionRandom(int N, int D_MODEL, int N_HEAD, float RANDOM_FRAC)
 
     // Kernel Here
     MultiHeadDDS<<<numBlock1, threadPerBlock1>>>(query, key, attn_scores, N, N, d_k, random_idx, num_random);
+
+    MultiHeadSoftMaxSparse<<<numBlock2, threadPerBlock2, SMSize>>>(attn_scores, N, N, random_idx, num_random);
 
     cudaDeviceSynchronize();
     cudaEventRecord(stop,0);
