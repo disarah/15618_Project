@@ -1,6 +1,10 @@
 EXECUTABLE := main
 LDFLAGS=-L/usr/local/cuda-11.7/lib64/ -lcudart
+<<<<<<< HEAD
 CU_FILES   := gpuNaiveAttention.cu gpuSparseAttentionWindow.cu
+=======
+CU_FILES   := gpuNaiveAttention.cu gpuSparseAttentionWindow.cu gpuSparseAttentionRandom.cu
+>>>>>>> cpp-attention
 CU_DEPS    :=
 CC_FILES   := main.cpp
 LOGS	   := logs
@@ -26,7 +30,11 @@ LDFRAMEWORKS := $(addprefix -framework , $(FRAMEWORKS))
 
 NVCC=nvcc
 
+<<<<<<< HEAD
 OBJS=$(OBJDIR)/main.o $(OBJDIR)/gpuNaiveAttention.o $(OBJDIR)/gpuSparseAttentionWindow.o
+=======
+OBJS=$(OBJDIR)/main.o $(OBJDIR)/gpuNaiveAttention.o $(OBJDIR)/gpuSparseAttentionWindow.o $(OBJDIR)/gpuSparseAttentionRandom.o
+>>>>>>> cpp-attention
 
 
 .PHONY: dirs clean

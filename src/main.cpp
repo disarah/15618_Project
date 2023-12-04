@@ -11,6 +11,10 @@
 
 #include "gpuNaiveAttention.h"
 #include "gpuSparseAttentionWindow.h"
+<<<<<<< HEAD
+=======
+#include "gpuSparseAttentionRandom.h"
+>>>>>>> cpp-attention
 
 #define N 1024  // multiple of 8
 #define RANDOM_FRAC 0.015  // fraction of N per row for random sparse attn
@@ -231,5 +235,11 @@ int main(void) {
     gpuNaiveAttention(N, D_MODEL, N_HEAD);
     printf("========================== GPU Sparse (Window) ==========================\n");
     gpuSparseAttentionWindow(N, D_MODEL, N_HEAD);
+<<<<<<< HEAD
+=======
+    printf("========================== GPU Sparse (Random) ==========================\n");
+    gpuSparseAttentionRandom(N, D_MODEL, N_HEAD);
+
+>>>>>>> cpp-attention
 	return 0;
 }
