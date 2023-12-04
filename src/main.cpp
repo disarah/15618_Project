@@ -312,6 +312,8 @@ int main(void) {
     gpuNaiveAttention(N, D_MODEL, N_HEAD);
     printf("========================== GPU Sparse (Window) ==========================\n");
     gpuSparseAttentionWindow(N, D_MODEL, N_HEAD);
+    printf("========================== GPU Sparse (Global) ==========================\n");
+    gpuSparseAttentionGlobal(N, D_MODEL, N_HEAD);
     printf("========================== GPU Sparse (Random) ==========================\n");
     gpuSparseAttentionRandom(N, D_MODEL, N_HEAD);
 
