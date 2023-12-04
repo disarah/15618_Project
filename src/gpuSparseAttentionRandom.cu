@@ -5,12 +5,31 @@
 #include <iostream>
 #include <cmath>
 #include <chrono>
+#include <vector>
+#include <set>
+#include<algorithm>
 
 #include "gpuSparseAttentionRandom.h"
 
+// #define TS 8
+
+__global__ void MultiHeadDDS(float* A, float* B, float* C, int M, int N, int K, int* idx, int num_random) {
+    int h = blockIdx.x;
+    int i = blockDim.x * blockIdx.y + threadIdx.x;
+    int tmp_j = i * num_random + threadIdx.y;
+    if (tmp_j < N * num_random && tmp_j >= 0 && i < N) {
+        int j = idx[i * num_random + threadIdx.y];
+        float tmp = 0.0f;
+        for(int k = 0; k < K; k++) {
+            tmp += A[h * M * K + i * K + k] * B[h * K * N + k * N + j]; 
+        }
+        C[h * M * N + i * N + j] = tmp;
+    }
+    
+}
 
 
-void gpuSparseAttentionRandom(int N, int D_MODEL, int N_HEAD) {
+void gpuSparseAttentionRandom(int N, int D_MODEL, int N_HEAD, float RANDOM_FRAC) {
     int d_k = D_MODEL / N_HEAD;
     float sqrt_d_k = sqrt(d_k);
 
@@ -24,6 +43,35 @@ void gpuSparseAttentionRandom(int N, int D_MODEL, int N_HEAD) {
     // =============================================================================================
     // Tiling + random sparse
 
+    // init random stuff
+    int num_random = N * RANDOM_FRAC;
+    std::vector<std::set<int>> random_idx_tmp;
+    random_idx_tmp.resize(N);
+
+    for (int i = 0; i < N; i++) {
+        while(random_idx_tmp[i].size() != num_random) {
+            int randomNumber = rand();
+            random_idx_tmp[i].insert(randomNumber % N);
+        }
+    }
+
+    int *random_idx;
+    cudaMalloc((void **)&random_idx, N * num_random * sizeof(int));
+    
+    std::vector<std::vector<int>> random_idx_vec;
+    random_idx_vec.resize(N);
+    for (int i = 0; i < N; i++) {
+        std::vector<int> l(random_idx_tmp[i].begin(), random_idx_tmp[i].end());
+        std::sort(l.begin(), l.end());
+        random_idx_vec[i] = l;
+    }
+
+    cudaMemcpy(random_idx, random_idx_vec.data(), sizeof(int) * N * num_random, cudaMemcpyHostToDevice);
+
+    int rows_per_block = (1024 + num_random-1) / num_random;
+    dim3 threadPerBlock1(rows_per_block, num_random);
+    dim3 numBlock1(N_HEAD, (N+rows_per_block-1)/rows_per_block);
+
     cudaEvent_t start, stop;
     float elapsedTime = 0.0;
     cudaEventCreate(&start);
@@ -32,6 +80,7 @@ void gpuSparseAttentionRandom(int N, int D_MODEL, int N_HEAD) {
     cudaEventRecord(start,0);
 
     // Kernel Here
+    MultiHeadDDS<<<numBlock1, threadPerBlock1>>>(query, key, attn_scores, N, N, d_k, random_idx, num_random);
 
     cudaDeviceSynchronize();
     cudaEventRecord(stop,0);

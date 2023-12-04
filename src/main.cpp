@@ -13,8 +13,8 @@
 #include "gpuSparseAttentionWindow.h"
 #include "gpuSparseAttentionRandom.h"
 
-#define N 1024  // multiple of 8
-#define RANDOM_FRAC 0.015  // fraction of N per row for random sparse attn
+#define N 512  // multiple of 8
+#define RANDOM_FRAC 0.02  // fraction of N per row for random sparse attn
 #define D_MODEL 512 // multiple of 8
 #define N_HEAD 8    // should be able to divide D_MODEL
 #define d_k D_MODEL / N_HEAD
@@ -233,7 +233,7 @@ int main(void) {
     printf("========================== GPU Sparse (Window) ==========================\n");
     gpuSparseAttentionWindow(N, D_MODEL, N_HEAD);
     printf("========================== GPU Sparse (Random) ==========================\n");
-    gpuSparseAttentionRandom(N, D_MODEL, N_HEAD);
+    gpuSparseAttentionRandom(N, D_MODEL, N_HEAD, RANDOM_FRAC);
 
     return 0;
 }
