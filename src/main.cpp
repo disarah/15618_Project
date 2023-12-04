@@ -71,7 +71,7 @@ class CPUNaiveAttention {
                 for(int n2 = start; n2 < end; n2++) {
                     sum += attn_scores[h*N*N + n1*N + n2];
                 }
-                for(int n2 = 0; n2 < N; n2++) {
+                for(int n2 = start; n2 < end; n2++) {
                     attn_scores[h*N*N + n1*N + n2] /= sum;
                 }
             }
