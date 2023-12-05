@@ -64,10 +64,11 @@ __global__ void MultiHeadSDD(float* A, float* B, float* C, int M, int N, int K, 
     register float tmp = 0.0f;
     for (int p = 0; p < num_random; p++) {
         int idx_tmp = idx[i * num_random + p];
+        idx_tmp = idx_tmp >= 0 ? idx_tmp % N : 0;
         tmp += A[h * M * K + i * K + idx_tmp] * B[h * K * N + idx_tmp * N + j];
     }
     
-    C[h * M * N + i * N + j] = 0;
+    C[h * M * N + i * N + j] = tmp;
 }
 
 void gpuSparseAttentionRandom(int N, int D_MODEL, int N_HEAD, float RANDOM_FRAC) {
