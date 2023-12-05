@@ -55,7 +55,20 @@ __global__ void MultiHeadSoftMaxSparse(float* A, int M, int N, int* idx, int num
     }
 }
 
+__global__ void MultiHeadSDD(float* A, float* B, float* C, int M, int N, int K, int* idx, int num_random) {
+    
+    int h = blockIdx.x;
+    int i = blockDim.x * blockIdx.y + threadIdx.x;
+    int j = threadIdx.y;
 
+    register float tmp = 0.0f;
+    for (int p = 0; p < num_random; p++) {
+        int idx_tmp = idx[i * num_random + p];
+        tmp += A[h * M * K + i * K + idx_tmp] * B[h * K * N + idx_tmp * N + j];
+    }
+    
+    C[h * M * N + i * N + j] = 0;
+}
 
 void gpuSparseAttentionRandom(int N, int D_MODEL, int N_HEAD, float RANDOM_FRAC) {
     int d_k = D_MODEL / N_HEAD;
@@ -105,6 +118,10 @@ void gpuSparseAttentionRandom(int N, int D_MODEL, int N_HEAD, float RANDOM_FRAC)
     dim3 threadPerBlock2(rows_per_block, num_random);
     dim3 numBlock2(N_HEAD, (N+rows_per_block-1)/rows_per_block);
 
+    int rowPerBlock = (1024 + d_k - 1)/d_k;
+    dim3 threadPerBlock3(rowPerBlock, d_k);
+    dim3 numBlock3(N_HEAD, (N+rowPerBlock-1)/rowPerBlock);
+
     cudaEvent_t start, stop;
     float elapsedTime = 0.0;
     cudaEventCreate(&start);
@@ -116,6 +133,8 @@ void gpuSparseAttentionRandom(int N, int D_MODEL, int N_HEAD, float RANDOM_FRAC)
     MultiHeadDDS<<<numBlock1, threadPerBlock1>>>(query, key, attn_scores, N, N, d_k, random_idx, num_random);
 
     MultiHeadSoftMaxSparse<<<numBlock2, threadPerBlock2, SMSize>>>(attn_scores, N, N, random_idx, num_random);
+
+    MultiHeadSDD<<<numBlock3, threadPerBlock3>>>(attn_scores, value, result, N, d_k, N, random_idx, num_random);
 
     cudaDeviceSynchronize();
     cudaEventRecord(stop,0);
