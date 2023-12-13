@@ -11,9 +11,11 @@
 
 #include "gpuNaiveAttention.h"
 #include "gpuSparseAttentionWindow.h"
+#include "gpuSparseAttentionRandom.h"
+#include "gpuSparseAttentionGlobal.h"
 
-#define N 1024  // multiple of 8
-#define RANDOM_FRAC 0.015  // fraction of N per row for random sparse attn
+#define N 512  // multiple of 8
+#define RANDOM_FRAC 0.02  // fraction of N per row for random sparse attn
 #define D_MODEL 512 // multiple of 8
 #define N_HEAD 8    // should be able to divide D_MODEL
 #define d_k D_MODEL / N_HEAD
@@ -70,7 +72,7 @@ class CPUNaiveAttention {
                 for(int n2 = start; n2 < end; n2++) {
                     sum += attn_scores[h*N*N + n1*N + n2];
                 }
-                for(int n2 = 0; n2 < N; n2++) {
+                for(int n2 = start; n2 < end; n2++) {
                     attn_scores[h*N*N + n1*N + n2] /= sum;
                 }
             }
@@ -93,6 +95,83 @@ class CPUNaiveAttention {
 
         auto end = std::chrono::steady_clock::now();
         std::cout << "cpu sparse attention (window): " << std::chrono::duration_cast<std::chrono::microseconds>(end - beg).count() << " microseconds" << "\n\n";
+    }
+
+    void sparse_scaled_dot_product_attention_global() {
+        float *attn_scores = (float*)malloc(N_HEAD*N*N* sizeof(float));
+        float *result = (float*)malloc(N_HEAD*N*d_k * sizeof(float));
+        auto beg = std::chrono::steady_clock::now();
+
+        // query x key^T
+        int ws = 16;
+        float sqrt_d_k = sqrt(d_k);
+        float score;
+        for(int h = 0; h < N_HEAD; h++) {
+            for(int n1 = 0; n1 < N; n1++) {
+                if(n1+1%ws == 0){ // full row case
+                    for(int n2 = 0; n2 < N; n2++) {
+                        score = 0.0;
+                        for(int d=0; d < d_k; d++) {
+                            score += query[get(h,n1,d)] * key[get(h,n2,d)];
+                        }
+                        attn_scores[h*N*N + n1*N + n2] = score / sqrt_d_k;
+                    }
+                } else { // gaps of ws case
+                    for(int n2 = ws-1; n2 < N; n2+=ws) {
+                        score = 0.0;
+                        for(int d=0; d < d_k; d++) {
+                            score += query[get(h,n1,d)] * key[get(h,n2,d)];
+                        }
+                        attn_scores[h*N*N + n1*N + n2] = score / sqrt_d_k;
+                    }
+                }
+                
+            }
+        }
+
+        // softmax on attn_scores
+        for(int h = 0; h < N_HEAD; h++) {
+            for(int n1 = 0; n1 < N; n1++) {
+                float sum = 0.0;
+                if (n1+1%ws == 0){ // full row case
+                    for(int n2 = 0; n2 < N; n2++) {
+                        sum += attn_scores[h*N*N + n1*N + n2];
+                    }
+                    for(int n2 = 0; n2 < N; n2++) {
+                        attn_scores[h*N*N + n1*N + n2] /= sum;
+                    }
+                } else { // gaps of ws case
+                    for(int n2 = ws-1; n2 < N; n2+=ws) {
+                        sum += attn_scores[h*N*N + n1*N + n2];
+                    }
+                    for(int n2 = ws-1; n2 < N; n2+=ws) {
+                        attn_scores[h*N*N + n1*N + n2] /= sum;
+                    }
+                }
+            }
+        }
+
+        // attn_scores x value
+        for(int h = 0; h < N_HEAD; h++) {
+            for(int n1 = 0; n1 < N; n1++) {
+                for(int d = 0; d < d_k; d++) {
+                    float sum = 0.0;
+                    if (n1+1%ws == 0){ // full row case
+                        for(int n2 = 0; n2 < N; n2++) {
+                            sum += attn_scores[h*N*N + n1*N + n2] * value[get(h,n2,d)];
+                        }
+                    } else { // gaps of ws case
+                        for(int n2 = ws-1; n2 < N; n2+=ws) {
+                            sum += attn_scores[h*N*N + n1*N + n2] * value[get(h,n2,d)];
+                        }
+                    }
+                    result[get(h,n1,d)] = sum;
+                }
+            }
+        }
+
+        auto end = std::chrono::steady_clock::now();
+        std::cout << "cpu sparse attention (global): " << std::chrono::duration_cast<std::chrono::microseconds>(end - beg).count() << " microseconds" << "\n\n";
     }
 
     void sparse_scaled_dot_product_attention_random() {
@@ -224,6 +303,8 @@ int main(void) {
     cpuNaiveAttention.scaled_dot_product_attention();
     printf("========================== CPU Sparse (Window)==========================\n");
     cpuNaiveAttention.sparse_scaled_dot_product_attention_window();
+    printf("========================== CPU Sparse (Global)==========================\n");
+    cpuNaiveAttention.sparse_scaled_dot_product_attention_global();
     printf("========================== CPU Sparse (Random)==========================\n");
     cpuNaiveAttention.sparse_scaled_dot_product_attention_random();
 
@@ -231,5 +312,10 @@ int main(void) {
     gpuNaiveAttention(N, D_MODEL, N_HEAD);
     printf("========================== GPU Sparse (Window) ==========================\n");
     gpuSparseAttentionWindow(N, D_MODEL, N_HEAD);
-	return 0;
+    printf("========================== GPU Sparse (Global) ==========================\n");
+    gpuSparseAttentionGlobal(N, D_MODEL, N_HEAD);
+    printf("========================== GPU Sparse (Random) ==========================\n");
+    gpuSparseAttentionRandom(N, D_MODEL, N_HEAD, RANDOM_FRAC);
+
+    return 0;
 }
