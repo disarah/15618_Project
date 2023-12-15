@@ -1,0 +1,19 @@
+\begin{table}[t]
+\small
+\centering
+\renewcommand{\arraystretch}{1.2}
+\setlength{\tabcolsep}{7.0pt}
+% =====================================================================
+%                           Global sparse
+% =====================================================================
+\begin{tabular}{||c c |c c | c c||}
+\hline
+DDS$_1$ & DDS$_2$ & SM$_1$ & SM$_2$& SDD$_1$ & SDD$_2$\\
+\hline\hline
+44.44 & 34.82 &105.82 & 5.63 & 83.97 &	109.76\\
+
+\hline
+\end{tabular}
+\caption{Kernel-specific execution times for global-sparse attention on GPU (\texttt{N = 1024},\texttt{ID = 16}). First pass (i.e. DDS$_1$, SM$_1$, SDD$_1$) target grid-like rows while the second pass targets full rows.}
+\label{table:globalid}
+\end{table}

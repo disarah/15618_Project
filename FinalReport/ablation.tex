@@ -1,0 +1,69 @@
+\begin{table}[t]
+\small
+\centering
+\renewcommand{\arraystretch}{1.2}
+\setlength{\tabcolsep}{7.5pt}
+% =====================================================================
+%                           Window sparse
+% =====================================================================
+\begin{subtable}{\linewidth}\centering
+\begin{tabular}{||c|c||}
+\hline
+
+\texttt{ws} & Total \\ [0.5ex] 
+
+\hline\hline
+
+16 & 58.11 \\
+32 & 97.60 \\
+64 & 184.32 \\
+
+
+\hline
+\end{tabular}
+\caption{Window-sparse attention on GPU ablation. \texttt{ws} is window size.}
+\end{subtable}
+% =====================================================================
+%                           Random sparse
+% =====================================================================
+\begin{subtable}{\linewidth}\centering
+\begin{tabular}{||c|c||}
+\hline
+
+\texttt{RF} & Total \\ [0.5ex] 
+
+\hline\hline
+
+0.02 & 258.40 \\
+0.1 & 1337.98 \\
+0.2 & 2708.16 \\
+0.4 & 5350.53 \\
+0.6 & 8139.29 \\
+
+
+\hline
+\end{tabular}
+\caption{Random-sparse attention on GPU ablation. \texttt{RF} is the random fraction.}
+\end{subtable}
+% =====================================================================
+%                           Global sparse
+% =====================================================================
+\begin{subtable}{\linewidth}\centering
+\begin{tabular}{||c|c||}
+\hline
+
+ID & Total \\
+
+\hline\hline
+16 & 344.06 \\
+32 & 518.14 \\
+64 & 685.66 \\
+
+
+\hline
+\end{tabular}
+\caption{Global-sparse attention on GPU ablation. \texttt{ID} is the number of global indices.}
+\end{subtable}
+\caption{Ablations. Total is the total execution time for all kernels (DDS, softmax, SDD). Experiments are done on sequence length \texttt{N = 1024}.}
+\label{table:ablation}
+\end{table}
