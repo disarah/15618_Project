@@ -9,16 +9,16 @@
         xticklabels from table={\testdata}{Label},
         xticklabel style={text width=2cm,align=center},
     ]  
-    \addplot [fill=green!80] table [y=SelfAttention, meta=Label, x expr=\coordindex] {\testdata};
+    \addplot [fill=black!30!red!80] table [y=SelfAttention, meta=Label, x expr=\coordindex] {\testdata};
     \addlegendentry{Self Attention}
     
-    \addplot [fill=blue!60] table [y=SelfOutput, meta=Label, x expr=\coordindex] {\testdata};
+    \addplot [fill={rgb:black,1;white,2;red,1}] table [y=SelfOutput, meta=Label, x expr=\coordindex] {\testdata};
     \addlegendentry{Self Add \& Norm}
     
-    \addplot [fill=red!60] table [y=FeedForward, meta=Label, x expr=\coordindex] {\testdata};
+    \addplot [fill=black!30!blue!80!green] table [y=FeedForward, meta=Label, x expr=\coordindex] {\testdata};
     \addlegendentry{Feed-Forward}
     
-    \addplot [fill=orange!60] table [y=Output, meta=Label, x expr=\coordindex] {\testdata};
+    \addplot [fill={rgb:blue,1;white,2;black,1}] table [y=Output, meta=Label, x expr=\coordindex] {\testdata};
     \addlegendentry{Add \& Norm}
     \addplot [
         ybar, % this makes it show the total for some reason

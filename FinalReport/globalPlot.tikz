@@ -1,0 +1,25 @@
+\begin{tikzpicture}
+    \begin{axis}[
+        ybar stacked,
+        xlabel= Kernel,
+        ylabel= Time(s),
+        ymin=0,
+        xtick=data,
+        legend style={cells={anchor=west}, legend pos=north west},
+        xticklabels from table={\testdata}{Label},
+        xticklabel style={text width=2cm,align=center},
+    ]  
+    \addplot [fill=black!30!red!80] table [y=Grid-like, meta=Label, x expr=\coordindex] {\testdata};
+    \addlegendentry{Grid-Like}
+    
+    \addplot [fill=black!30!blue!80!green] table [y=Full, meta=Label, x expr=\coordindex] {\testdata};
+    \addlegendentry{Full}
+    \addplot [
+        ybar, % this makes it show the total for some reason
+        nodes near coords,
+        nodes near coords style={%
+            anchor=south,%
+        },
+    ] table [ y expr=0.00001, x expr=\coordindex] {\testdata};
+    \end{axis}
+    \end{tikzpicture}
